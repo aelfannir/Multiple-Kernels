@@ -1,10 +1,12 @@
 #!/usr/bin/env php
 <?php
 
+use App\ApiKernel;
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\ErrorHandler\Debug;
+use \Symfony\Component\Console\Input\InputOption;
 
 if (!in_array(PHP_SAPI, ['cli', 'phpdbg', 'embed'], true)) {
     echo 'Warning: The console should be invoked via the CLI version of PHP, not the '.PHP_SAPI.' SAPI'.PHP_EOL;
@@ -37,6 +39,34 @@ if ($_SERVER['APP_DEBUG']) {
     }
 }
 
-$kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
+
+//$name = $input->getParameterOption(['--kernel', '-k'], getenv('APP_NAME') ?: 'site');
+//if ($name === "api") {
+//    $kernel = new ApiKernel($_SERVER['APP_ENV'], (bool)$_SERVER['APP_DEBUG']);
+//    $application = new Application($kernel);
+//    $application
+//        ->getDefinition()
+//        ->addOption(new  InputOption('--kernel', '-k', InputOption::VALUE_REQUIRED, 'The kernel name', $kernel->getName()))
+//    ;
+//} else {
+//    $kernel = new Kernel($_SERVER['APP_ENV'], (bool)$_SERVER['APP_DEBUG']);
+//    $application = new Application($kernel);
+//}
+
+if ($input->getParameterOption(['--kernel', '-k']) === "api") {
+
+    dump('The API kernel');
+    $kernel = new ApiKernel($_SERVER['APP_ENV'], (bool)$_SERVER['APP_DEBUG']);
+    $application = new Application($kernel);
+    $application
+        ->getDefinition()
+        ->addOption(new InputOption('--kernel', '-k', InputOption::VALUE_REQUIRED, 'The API kernel'))
+    ;
+    $application->run($input);
+    return;
+}
+
+$kernel = new Kernel($_SERVER['APP_ENV'], (bool)$_SERVER['APP_DEBUG']);
 $application = new Application($kernel);
 $application->run($input);
+
